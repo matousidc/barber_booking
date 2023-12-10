@@ -11,7 +11,7 @@ class TimeSlot(Base):
     day = Column(Integer, index=True)
     booked_slot = Column(Boolean, default=False)
     user_id = Column(String(255), nullable=True, default=None)
-    # user_id_idx = Index('user_id_idx', 'user_id')
+    user_id_idx = Index('user_id_idx', 'user_id')
 
 
 class User(Base):

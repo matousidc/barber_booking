@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Schedule</title>
+    <style>
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+            background: black;
+            color: white;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+            background: black;
+            color: white;
+        }
+
+        th {
+            background: black;
+            color: white;
+        }
+
+        .day-column {
+            width: 100px;
+        }
+
+        .time-slot-column {
+            width: 150px;
+        }
+        .increased-height {
+            height: 140px; /* Set your desired height */
+        }
+    </style>
+</head>
+<body>
+
+<h1>Barber booking - weekly schedule</h1>
+
+<table class="schedule-table">
+    <tr>
+        <!--        <th class="day-column">Day</th>-->
+        <td class="time-slot-column">Monday</td>
+        <td class="time-slot-column">Tuesday</td>
+        <td class="time-slot-column">Wednesday</td>
+        <td class="time-slot-column">Thursday</td>
+        <td class="time-slot-column">Friday</td>
+        <td class="time-slot-column">Saturday</td>
+        <td class="time-slot-column">Sunday</td>
+    </tr>
+    <tr class="increased-height">
+        <td class="day-column">{{keyword[0]}}</td>
+        <td class="day-column">{{keyword[1]}}</td>
+        <td class="day-column">{{keyword[2]}}</td>
+        <td class="day-column">{{keyword[3]}}</td>
+        <td class="day-column">{{keyword[4]}}</td>
+        <td></td>
+        <td></td>
+    </tr>
+</table>
+</body>
+</html>
