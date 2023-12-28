@@ -1,3 +1,4 @@
+# run with: uvicorn main:app --reload
 from datetime import datetime
 
 from fastapi import Depends, FastAPI, HTTPException, Request
@@ -55,6 +56,7 @@ def fetch_user(db: Session = Depends(get_db)):
 @app.put("/book_slot", response_model=schemas.TimeSlot, status_code=200)
 def book_slot(time_slot_id: int, user: schemas.UserBase, db: Session = Depends(get_db)):
     """User books empty slot, use path example: book_slot/?time_slot_id=0 + body"""
+    print(user)
     booked_slot = crud.book_slot(db=db, time_slot_id=time_slot_id, user=user)
     if not booked_slot:
         raise HTTPException(status_code=404, detail="Slot booking failed, was probably already taken")
