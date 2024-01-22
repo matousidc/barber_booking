@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
+import sys
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
@@ -80,9 +81,12 @@ DATABASES = {
         'PORT': os.environ.get('DB_PORT'),
         'USER': os.environ.get('DB_USERNAME'),
         'PASSWORD': os.environ.get('DB_PASSWORD'),
-        'OPTIONS': {'ssl': True, 'charset': 'utf8mb4'}
+        'OPTIONS': {'ssl': True, 'charset': 'utf8mb4'},
     }
 }
+
+if 'test' in sys.argv:
+    DATABASES['default'] = {'ENGINE': 'django.db.backends.sqlite3', 'name': ':memory:'}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators

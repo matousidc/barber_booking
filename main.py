@@ -56,8 +56,18 @@ def fetch_user(db: Session = Depends(get_db)):
 @app.put("/book_slot", response_model=schemas.TimeSlot, status_code=200)
 def book_slot(time_slot_id: int, user: schemas.UserBase, db: Session = Depends(get_db)):
     """User books empty slot, use path example: book_slot/?time_slot_id=0 + body"""
-    print(user)
     booked_slot = crud.book_slot(db=db, time_slot_id=time_slot_id, user=user)
+    if not booked_slot:
+        raise HTTPException(status_code=404, detail="Slot booking failed, was probably already taken")
+    # send email with confirmation
+    return booked_slot
+
+
+@app.put("/book_slot_test", response_model=schemas.TimeSlot, status_code=200)
+def book_slot_test(time_slot_id: int, user: schemas.UserBase, db: Session = Depends(get_db)):
+    """Test endpoint for speed of database """
+    # booked_slot = crud.book_slot(db=db, time_slot_id=time_slot_id, user=user)
+    booked_slot = models.TimeSlot(id=555, week=5, day=1, year=2024, user_id='ssf', booked_slot=True)
     if not booked_slot:
         raise HTTPException(status_code=404, detail="Slot booking failed, was probably already taken")
     # send email with confirmation

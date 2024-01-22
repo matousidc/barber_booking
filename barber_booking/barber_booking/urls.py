@@ -16,8 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from booking import views  # relative import doesnt work
 
 urlpatterns = [
     path("booking/", include("booking.urls")),
     path('admin/', admin.site.urls),
+    path("", views.IndexView.as_view())
 ]

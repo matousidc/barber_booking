@@ -25,7 +25,7 @@ def insert_timeslots(db: Session):
     week_num = int(datetime.now().strftime("%W"))
     for x in range(0, 5):
         for i in range(0, 7):
-            time_slot = create_time_slot(year=2023, week=week_num + x, day=i, booked_slot=False)
+            time_slot = create_time_slot(year=2024, week=week_num + x, day=i, booked_slot=False)
             db.add(time_slot)
     db.commit()
 

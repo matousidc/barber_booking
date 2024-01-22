@@ -1,10 +1,13 @@
+# run with: python manage.py runserver 8080
 import os
+import json
 from dotenv import load_dotenv
 import requests
-from django.shortcuts import render, get_list_or_404
-from django.http import HttpResponse, HttpResponseRedirect
+from django import forms
+from django.shortcuts import render, get_list_or_404, redirect
+from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
-from django.views import generic
+from django.views import generic, View
 from datetime import datetime
 from .models import TimeSlot, User
 
@@ -13,43 +16,63 @@ FASTAPI_URL = os.getenv("BACKEND_URL")
 
 
 # Create your views here.
-def index(request):
+class IndexView(generic.View):
     """Shows schedule for current week"""
-    week_num = datetime.now().strftime("%W")
-    return HttpResponseRedirect(reverse("booking:schedule", args=(week_num,)))
+
+    def get(self, request):
+        week_num = datetime.now().strftime("%W")
+        return redirect("booking:schedule", week=week_num)
 
 
-# def bruh(request, text):
-#     return HttpResponse("you don't compare %s" % text)
-
-class IndexView(generic.ListView):
-    model = User
+class BruhView(generic.ListView):
+    # model = User
     template_name = "booking/index.html"
     context_object_name = "context"
 
+    def get_queryset(self):
+        return User.objects.all()
 
-def show_schedule(request, week: int):
+
+class BookingForm(forms.Form):
+    name = forms.CharField()
+    email = forms.EmailField()
+    selected_day = forms.IntegerField()
+
+
+class ShowSchedule(generic.View):
     """Shows schedule for a given week as a html template"""
-    # selected_choice = User.email.get(pk=request.POST["email"])
-    schedule = get_list_or_404(TimeSlot, week=week)  # raises exception by itself
-    context = {"is_booked": ["Booked" if x.booked_slot else "Available" for x in schedule][:5], "week": week}
-    return render(request, "booking/schedule.html", context=context)
+    template_name = "booking/schedule.html"
+
+    def get(self, request, week: int):
+        schedule = get_list_or_404(TimeSlot, week=week)  # raises exception by itself
+        context = {"is_booked": ["Booked" if x.booked_slot else "Available" for x in schedule][:5], "week": week}
+        return render(request, self.template_name, context=context)
 
 
-def book_slot(request, week: int):
-    """Gets values from template, books slot in database"""
-    # values from html template
-    name = request.POST["name"]
-    email = request.POST["email"]
-    day_idx = request.POST["selected_day"]
-    time_slot = TimeSlot.objects.get(day=day_idx, week=week)
-    # request to book_slot api
+class BookSlot(View):
+    form_class = BookingForm
 
-    user_info = {"name": name, "email": email}
-    r = requests.put(f"{FASTAPI_URL}/book_slot/?time_slot_id={time_slot.id}", json=user_info)
-    print(r.json())
-    return HttpResponseRedirect(reverse("booking:confirm_booking", args=(r.json(),)))
+    def post(self, request, week: int):
+        form = self.form_class(request.POST)
+        print(form.__dict__)
+        if form.is_valid():
+            # print("==========================================", form.day_idx)
+            time_slot = TimeSlot.objects.get(day=form.cleaned_data['selected_day'], week=week)
+            # request to book_slot API endpoint
+            user_data = {"name": form.cleaned_data['name'], "email": form.cleaned_data['email']}
+            r = requests.put(f"{FASTAPI_URL}/book_slot/?time_slot_id={time_slot.id}", json=user_data)
+            user_info = r.json()
+            user_info.pop("user_id")
+            user_info.pop("id")
+        else:
+            raise Http404("Submitted form is broken, go back end try again")
+        return redirect("booking:confirm_booking", user_info=user_info)
 
 
-def confirm_booking(request, user_info: str):
-    return render(request, "booking/index.html", context={"context": user_info})
+class ConfirmBooking(generic.View):
+    template_name = "booking/booking_confirmed.html"
+
+    def get(self, request, *args, **kwargs):
+        user_info = self.kwargs["user_info"]
+        user_info = json.dumps(user_info)
+        return render(request, self.template_name, context={"context": user_info})

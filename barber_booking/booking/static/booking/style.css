@@ -1,0 +1,54 @@
+.schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 20px;
+    background: black;
+    color: white;
+}
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+    background: black;
+    color: white;
+}
+
+th {
+    background: black;
+    color: white;
+}
+
+.day-column {
+    width: 100px;
+}
+
+.time-slot-column {
+    width: 150px;
+}
+.increased-height {
+    height: 140px; /* Set your desired height */
+}
+#selectedDayDisplay {
+    font-weight: bold;
+    margin-top: 10px;
+    color: red;
+}
+.submit-button {
+    margin-top: 20px;
+    background-color: #5d1060; /* Green background color */
+    color: white; /* White text color */
+    padding: 10px 20px; /* Padding around the text */
+    font-size: 16px; /* Font size */
+    border: none; /* No border */
+    border-radius: 4px; /* Rounded corners */
+    cursor: pointer; /* Add a pointer cursor on hover */
+}
+/* Hover effect for the submit button */
+.submit-button:hover {
+    background-color: #480d4a; /* Darker green background color on hover */
+}
