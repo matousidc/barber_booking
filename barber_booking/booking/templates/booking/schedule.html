@@ -9,12 +9,11 @@
 
 </head>
 <body>
-<h1>Barber booking - weekly schedule</h1>
+<h1>Barber booking - weekly schedule {{week}}</h1>
 
 <!-- Add a form element to enclose the input fields -->
-<form method="post" action="{% url 'booking:book_slot' week %}" id="scheduleForm" onsubmit="return validateForm()">
+<form method="post" action="{% url 'booking:book_slot' %}" id="scheduleForm" onsubmit="return validateForm()">
     {% csrf_token %}
-    <!--    <input type="hidden" name="selected_day" id="selectedDay" value="">-->
     <!-- Input fields for name and email -->
     <label for="name">Name:</label>
     <input type="text" id="name" name="name" required>
@@ -23,6 +22,7 @@
     <input type="email" id="email" name="email" required>
 
     <input type="hidden" name="selected_day" id="selectedDay" value="">
+    <input type="hidden" name="week_idx" id="week_idx" value={{week}}>
 
     <div id="selectedDayDisplay"></div>
     <table class="schedule-table">
@@ -56,9 +56,6 @@
 
 <script>
     function selectDay(day, index) {
-            // Set the selected day in the hidden input field
-            // document.getElementById('selectedDay').value = day;
-
             var daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
             // Retrieve the day with the given index
             var clickedDay = daysOfWeek[index];

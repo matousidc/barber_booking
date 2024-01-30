@@ -5,9 +5,10 @@ from dotenv import load_dotenv
 import requests
 from django import forms
 from django.shortcuts import render, get_list_or_404, redirect
-from django.http import HttpResponseRedirect, Http404
+from django.http import Http404
 from django.urls import reverse
 from django.views import generic, View
+from django.views.generic.edit import FormView
 from datetime import datetime
 from .models import TimeSlot, User
 
@@ -16,7 +17,7 @@ FASTAPI_URL = os.getenv("BACKEND_URL")
 
 
 # Create your views here.
-class IndexView(generic.View):
+class IndexView(View):
     """Shows schedule for current week"""
 
     def get(self, request):
@@ -33,13 +34,7 @@ class BruhView(generic.ListView):
         return User.objects.all()
 
 
-class BookingForm(forms.Form):
-    name = forms.CharField()
-    email = forms.EmailField()
-    selected_day = forms.IntegerField()
-
-
-class ShowSchedule(generic.View):
+class ShowSchedule(View):
     """Shows schedule for a given week as a html template"""
     template_name = "booking/schedule.html"
 
@@ -49,27 +44,34 @@ class ShowSchedule(generic.View):
         return render(request, self.template_name, context=context)
 
 
-class BookSlot(View):
+class BookingForm(forms.Form):
+    name = forms.CharField()
+    email = forms.EmailField()
+    selected_day = forms.IntegerField()
+    week_idx = forms.IntegerField()
+
+
+class BookSlot(FormView):
+    """Makes request to book_slot endpoint with data extracted from form"""
     form_class = BookingForm
 
-    def post(self, request, week: int):
-        form = self.form_class(request.POST)
-        print(form.__dict__)
-        if form.is_valid():
-            # print("==========================================", form.day_idx)
-            time_slot = TimeSlot.objects.get(day=form.cleaned_data['selected_day'], week=week)
-            # request to book_slot API endpoint
-            user_data = {"name": form.cleaned_data['name'], "email": form.cleaned_data['email']}
-            r = requests.put(f"{FASTAPI_URL}/book_slot/?time_slot_id={time_slot.id}", json=user_data)
-            user_info = r.json()
-            user_info.pop("user_id")
-            user_info.pop("id")
-        else:
-            raise Http404("Submitted form is broken, go back end try again")
+    def form_valid(self, form):
+        # expects form sent with POST
+        time_slot = TimeSlot.objects.get(day=form.cleaned_data['selected_day'], week=form.cleaned_data["week_idx"])
+        # request to book_slot API endpoint
+        user_data = {"name": form.cleaned_data['name'], "email": form.cleaned_data['email']}
+        r = requests.put(f"{FASTAPI_URL}/book_slot/?time_slot_id={time_slot.id}", json=user_data)
+        user_info = r.json()
+        user_info.pop("user_id")
+        user_info.pop("id")
         return redirect("booking:confirm_booking", user_info=user_info)
 
+    def form_invalid(self, form):
+        raise Http404("Submitted form is broken, go back end try again")
 
-class ConfirmBooking(generic.View):
+
+class ConfirmBooking(View):
+    """After successfully booking a slot, redirects here"""
     template_name = "booking/booking_confirmed.html"
 
     def get(self, request, *args, **kwargs):
